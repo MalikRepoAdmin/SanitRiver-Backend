@@ -9,13 +9,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Sanctum\HasApiTokens; 
 
 #[Fillable(['email', 'username', 'password'])]
 #[Hidden(['password', 'remember_token'])]
 class Admin extends Authenticatable
 {
     /** @use HasFactory<AdminFactory> */
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable; 
 
     protected $table = 'admins';
 
