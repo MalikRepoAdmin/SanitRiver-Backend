@@ -1,12 +1,11 @@
 <?php
 
-use App\Http\Controllers\AdminController;
-use App\Http\Controllers\Api\SungaiApiController;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\GambarSungaiController;
-use App\Http\Controllers\LaporanSungaiController;
-use App\Http\Controllers\SungaiController;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\GambarSungaiController;
+use App\Http\Controllers\Api\LaporanSungaiController;
+use App\Http\Controllers\Api\SungaiController;
+use App\Http\Controllers\Api\UserController;
 use Illuminate\http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -24,14 +23,16 @@ Route::prefix('auth')->group(function () {
     Route::post('/logout-admin', [AuthController::class, 'logoutAdmin']);
 });
 
-// Resource routes for core models
-Route::resource('sungais', SungaiController::class);
-Route::resource('laporan-sungais', LaporanSungaiController::class);
-Route::resource('gambar-sungais', GambarSungaiController::class);
+Route::get('/sungais/map', [SungaiController::class, 'map']);
+
+// [DIUBAH]: Menggunakan apiResource agar method form HTML (create & edit) di-skip otomatis
+Route::apiResource('sungais', SungaiController::class);
+Route::apiResource('laporan-sungais', LaporanSungaiController::class);
+Route::apiResource('gambar-sungais', GambarSungaiController::class);
 
 // Admin and User routes
-Route::resource('admins', AdminController::class);
-Route::resource('users', UserController::class);
+Route::apiresource('admins', AdminController::class);
+Route::apiresource('users', UserController::class);
 
 // Special route for AJAX to get Bounding Box data (GeoJSON)
-Route::get('/sungai-bbox', [SungaiApiController::class, 'getWaterways'])->name('api.sungai.bbox');
+Route::get('/sungai-bbox', [SungaiController::class, 'getWaterways'])->name('api.sungai.bbox');
