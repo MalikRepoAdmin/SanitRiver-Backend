@@ -19,9 +19,12 @@ class Admin extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable; 
 
     protected $table = 'admins';
-
+    
+    //pengaturan Eloquent - Primary Key
     protected $primaryKey = 'admin_id';
 
+    //mass-assignment method Admin::create()
+    protected $fillable = ['username', 'email', 'password'];
     /**
      * Relationships
      */

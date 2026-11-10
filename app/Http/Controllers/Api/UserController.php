@@ -55,7 +55,7 @@ class UserController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Data user baru berhasil ditambahkan.',
+            'message' => "Profil user id {$user->user_id} berhasil ditambahkan.",
             'data' => $user
         ], 201);
     }
@@ -72,7 +72,7 @@ class UserController extends Controller
         if (!$user) {
             return response()->json([
                 'status' => false,
-                'message' => 'User tidak terdaftar / id tidak ada'
+                'message' => "Profil user id $user_id tidak ada."
             ], 404);
         }
 
@@ -85,8 +85,8 @@ class UserController extends Controller
             'status' => true,
             'message' => "Profil data user berhasil ditemukan. [{$infoLaporan}]",
             'data' => [
-                'user' => $user,
-                'name_word_count' => $nameWordCount
+            'user' => $user,
+            'name_word_count' => $nameWordCount
             ]
         ], 200);
     }
@@ -102,7 +102,7 @@ class UserController extends Controller
         if (!$user) {
             return response()->json([
                 'status' => false,
-                'message' => 'User tidak terdaftar / id tidak ada'
+                'message' => "Profil user id $user_id tidak ada."
             ], 404);
         }
 
@@ -133,7 +133,7 @@ class UserController extends Controller
         if (!$user) {
             return response()->json([
                 'status' => false,
-                'message' => 'User tidak terdaftar / id tidak ada'
+                'message' => "Profil user id $user_id tidak ada."
             ], 404);
         }
 
@@ -160,7 +160,7 @@ class UserController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Profil User Berhasil Diperbarui!',
+            'message' => "Profil user id {$user->user_id} berhasil diperbarui!.",
             'data' => $user
         ], 200);
     }
@@ -170,14 +170,14 @@ class UserController extends Controller
      */
     public function destroy(string $user_id)
     {
-        // Ubah findOrFail() menjadi find() biasa agar tidak crash halaman
-        $user = User::find($user_id);
+        //Ubah firstOrFail() menjadi first() biasa untuk mengaktifkan kustom handling 404
+        $user = User::where('$user_id', $user_id)->first();
 
         // Handling jika user tidak ditemukan / id tidak ada
         if (!$user) {
             return response()->json([
                 'status' => false,
-                'message' => 'User tidak terdaftar / id tidak ada'
+                'message' => "Gagal menghapus. Profil user id $user_id tidak ada."
             ], 404);
         }
 
@@ -185,7 +185,7 @@ class UserController extends Controller
         
         return response()->json([
             'status' => true,
-            'message' => 'Profil User Berhasil Dihapus!',
+            'message' => "Profil user id {$user->user_id} berhasil dihapus!",
         ], 200);
     }
 }

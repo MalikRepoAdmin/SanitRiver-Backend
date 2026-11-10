@@ -2,9 +2,12 @@
 
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DashboardApiController;
 use App\Http\Controllers\Api\GambarSungaiController;
 use App\Http\Controllers\Api\LaporanSungaiController;
+use App\Http\Controllers\Api\LaporanSungaiApiController;
 use App\Http\Controllers\Api\SungaiController;
+use App\Http\Controllers\Api\SungaiApiController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\http\Request;
 use Illuminate\Support\Facades\Route;
@@ -25,7 +28,10 @@ Route::prefix('auth')->group(function () {
 
 Route::get('/sungais/map', [SungaiController::class, 'map']);
 
-// [DIUBAH]: Menggunakan apiResource agar method form HTML (create & edit) di-skip otomatis
+
+Route::get('/dashboard/summary', [DashboardApiController::class, 'getSummary']);
+
+// Menggunakan apiResource sbg efisiensi 
 Route::apiResource('sungais', SungaiController::class);
 Route::apiResource('laporan-sungais', LaporanSungaiController::class);
 Route::apiResource('gambar-sungais', GambarSungaiController::class);
@@ -35,4 +41,4 @@ Route::apiresource('admins', AdminController::class);
 Route::apiresource('users', UserController::class);
 
 // Special route for AJAX to get Bounding Box data (GeoJSON)
-Route::get('/sungai-bbox', [SungaiController::class, 'getWaterways'])->name('api.sungai.bbox');
+Route::get('/sungai-bbox', [App\Http\Controllers\Api\SungaiApiController::class, 'getWaterways']);

@@ -28,10 +28,7 @@ class SungaiController extends Controller
      */
     public function create()
     {
-        return response()->json([
-            'status' => true,
-            'message' => 'Display create form for Sungai'
-        ], 200);
+        
     }
 
     /**
@@ -51,22 +48,21 @@ class SungaiController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Data sungai baru berhasil ditambahkan.',
-            'data' => $sungai
+            'message' => "Data sungai id {$sungai->sungai_id} berhasil ditambahkan.",
         ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show(string $sungai_id)
     {
-        $sungai = Sungai::find($id);
+        $sungai = Sungai::where('sungai_id', $sungai_id)->first();
 
         if (!$sungai) {
             return response()->json([
                 'status' => false,
-                'message' => 'id tidak ada'
+                'message' => "ID Sungai $sungai_id tidak ada!"
             ], 404);
         }
 
@@ -86,35 +82,22 @@ class SungaiController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
+    public function edit(string $sungai_id)
     {
-        $sungai = Sungai::find($id);
-
-        if (!$sungai) {
-            return response()->json([
-                'status' => false,
-                'message' => 'id tidak ada'
-            ], 404);
-        }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Form edit data sungai berhasil disiapkan.',
-            'data' => $sungai
-        ], 200);
+        
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, string $sungai_id)
     {
-        $sungai = Sungai::find($id);
+        $sungai = Sungai::where('sungai_id', $sungai_id)->first();
 
         if (!$sungai) {
             return response()->json([
                 'status' => false,
-                'message' => 'id tidak ada!'
+                'message' => "Gagal memperbarui: ID Sungai $sungai_id tidak ditemukan!"
             ], 404);
         }
 
@@ -130,7 +113,7 @@ class SungaiController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Data sungai berhasil diperbarui.',
+            'message' => "Data sungai id {$sungai->sungai_id} berhasil diperbarui.",
             'data' => $sungai
         ], 200);
     }
@@ -138,14 +121,14 @@ class SungaiController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy(string $sungai_id)
     {
-        $sungai = Sungai::find($id);
+        $sungai = Sungai::where('sungai_id', $sungai_id)->first();
 
         if (!$sungai) {
             return response()->json([
                 'status' => false,
-                'message' => 'id tidak ada!'
+                'message' => "Gagal menghapus: ID Sungai $sungai_id tidak ditemukan!"
             ], 404);
         }
 
@@ -161,21 +144,32 @@ class SungaiController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Data sungai beserta file gambar terkait berhasil dihapus.'
+            'message' => "Data sungai id {$sungai->sungai_id} beserta file gambar terkait berhasil dihapus."
         ], 200);
     }
 
     /**
-     * Display the map view for Sungai.
+     * Get all river locations for API Map rendering.
      */
-    public function map()
+    public function getLocations()
     {
-        $sungais = Sungai::with(['gambarSungais'])->get();
-    
+        // Ambil data sungai beserta koordinat (geometri) dan relasi gambarnya
+        $sungais = Sungai::with(['gambarSungais'])->latest()->get();
+
+        // Jika database sungai kosong, kembalikan respon empty array yang rapi
+        if ($sungais->isEmpty()) {
+            return response()->json([
+                'status'  => true,
+                'message' => 'Data lokasi sungai masih kosong.',
+                'data'    => []
+            ], 200);
+        }
+
+        // Return JSON murni yang siap dirender oleh Front-End sebagai koordinat peta
         return response()->json([
-            'status' => true,
-            'message' => 'Data peta sungai berhasil dimuat!',
-            'data' => $sungais
+            'status'  => true,
+            'message' => 'Seluruh koordinat dan lokasi peta sungai berhasil dimuat.',
+            'data'    => $sungais
         ], 200);
     }
 }

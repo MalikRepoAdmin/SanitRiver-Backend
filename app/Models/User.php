@@ -12,6 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens; 
 
+//mass-assignment method User::create()
 #[Fillable([
     'username',
     'password',
@@ -28,7 +29,7 @@ class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
     use HasApiTokens, HasFactory, Notifiable; 
-    // Primary Key
+    // pengaturan Eloquent - Primary Key
     protected $primaryKey = 'user_id';
 
     /**

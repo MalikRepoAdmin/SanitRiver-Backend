@@ -39,21 +39,24 @@ class AdminController extends Controller
      */
     public function store(Request $request)
     {
+        // Validasi data input dari API
         $validated = $request->validate([
             'username' => 'required|string|unique:admins,username',
             'email' => 'required|email|unique:admins,email',
             'password' => 'required|string|min:6',
         ]);
 
+        // Mengeksekusi mass-assignment ke database
         $admin = Admin::create([
             'username' => $validated['username'],
             'email' => $validated['email'],
             'password' => bcrypt($validated['password']),
         ]);
 
+        // Mengembalikan respon JSON melalui admin_id
         return response()->json([
             'status' => true,
-            'message' => 'Data admin baru berhasil ditambahkan.',
+            'message' => "Profil admin id {$admin->admin_id} berhasil ditambahkan.",
             'data' => $admin
         ], 201);
     }
@@ -70,7 +73,7 @@ class AdminController extends Controller
         if (!$admin) {
             return response()->json([
                 'status' => false,
-                'message' => 'Admin tidak terdaftar / id tidak ada.'
+                'message' => "Profil admin id $admin_id belum terdaftar."
             ], 404);
         }
 
@@ -78,10 +81,10 @@ class AdminController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => "Admin berhasil dimuat dengan id {$admin_id}.",
+            'message' => "Admin berhasil dimuat dengan id $admin_id.",
             'data' => [
-                'admin' => $admin,
-                'name_word_count' => $nameWordCount
+            'admin' => $admin,
+            'name_word_count' => $nameWordCount
             ]
         ], 200);
     }
@@ -96,7 +99,7 @@ class AdminController extends Controller
         if (!$admin) {
             return response()->json([
                 'status' => false,
-                'message' => 'Admin tidak terdaftar / id tidak ada.'
+                'message' => "Profil admin id $admin_id belum terdaftar."
             ], 404);
         }
 
@@ -117,7 +120,7 @@ class AdminController extends Controller
         if (!$admin) {
             return response()->json([
                 'status' => false,
-                'message' => 'Admin tidak terdaftar / id tidak ada.'
+                'message' => "Profil admin id $admin_id belum terdaftar."
             ], 404);
         }
 
@@ -130,7 +133,7 @@ class AdminController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Data profil admin berhasil diperbarui.',
+            'message' => "Profil admin id {$admin->admin_id} berhasil diperbarui.",
             'data' => $admin
         ], 200);
     }
@@ -145,7 +148,7 @@ class AdminController extends Controller
         if (!$admin) {
             return response()->json([
                 'status' => false,
-                'message' => 'Admin tidak terdaftar / id tidak ada.'
+                'message' => "Gagal menghapus. Admin id $admin_id belum terdaftar."
             ], 404);
         }
 
@@ -153,7 +156,9 @@ class AdminController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Admin berhasil dihapus.'
+            'message' => "Profil admin id {$admin->admin_id} berhasil dihapus!",
         ], 200);
+     
+    
     }
 }

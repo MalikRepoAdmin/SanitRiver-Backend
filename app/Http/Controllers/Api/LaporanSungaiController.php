@@ -28,10 +28,7 @@ class LaporanSungaiController extends Controller
      */
     public function create()
     {
-        return response()->json([
-            'status' => true,
-            'message' => 'Display create form for LaporanSungai'
-        ], 200);
+        
     }
 
     /**
@@ -53,25 +50,26 @@ class LaporanSungaiController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Data laporan sungai berhasil ditambahkan.',
-            'data' => $laporan
+            'message' => "Data laporan sungai ID {$laporan->laporansungai_id} berhasil ditambahkan."
         ], 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show($id)
+    public function show(string $laporansungai_id)
     {
-        $laporanSungai = LaporanSungai::find($id);
+        $laporanSungai = laporanSungai::where('laporansungai_id', $laporansungai_id)->first();
 
+        //handling 404
         if (!$laporanSungai) {
             return response()->json([
                 'status' => false,
-                'message' => 'Data laporan tidak tersedia / id tidak ada.'
+                'message' => "Data laporan sungai ID $laporansungai_id tidak tersedia."
             ], 404);
         }
 
+        //eager load memuat data relasi
         $laporanSungai->load(['user', 'sungai', 'gambarSungais']);
 
         return response()->json([
@@ -86,33 +84,20 @@ class LaporanSungaiController extends Controller
      */
     public function edit($id)
     {
-        $laporanSungai = LaporanSungai::find($id);
-
-        if (!$laporanSungai) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Data laporan tidak tersedia / id tidak ada.'
-            ], 404);
-        }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Form edit data laporan sungai berhasil disiapkan.',
-            'data' => $laporanSungai
-        ], 200);
+        
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, string $laporansungai_id)
     {
-        $laporanSungai = LaporanSungai::find($id);
+        $laporanSungai = laporanSungai::where('laporansungai_id', $laporansungai_id)->first();
 
         if (!$laporanSungai) {
             return response()->json([
                 'status' => false,
-                'message' => 'Data laporan tidak tersedia / id tidak ada.'
+                'message' => "Data laporan sungai ID $laporansungai_id tidak tersedia."
             ], 404);
         }
 
@@ -130,7 +115,7 @@ class LaporanSungaiController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Data laporan sungai berhasil diperbarui.',
+            'message' => "Data laporan sungai ID {$laporanSungai->laporansungai_id} berhasil diperbarui.",
             'data' => $laporanSungai
         ], 200);
     }
@@ -138,14 +123,14 @@ class LaporanSungaiController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy(string $laporansungai_id)
     {
-        $laporanSungai = LaporanSungai::find($id);
+        $laporanSungai = laporanSungai::where('laporansungai_id', $laporansungai_id)->first();
 
         if (!$laporanSungai) {
             return response()->json([
                 'status' => false,
-                'message' => 'Data laporan tidak tersedia / id tidak terdaftar.'
+                'message' => "Data laporan sungai ID $laporansungai_id tidak tersedia."
             ], 404);
         }
 
@@ -153,7 +138,7 @@ class LaporanSungaiController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => 'Data laporan sungai berhasil dihapus.'
+            'message' => "Data laporan sungai ID {$laporanSungai->laporansungai_id} berhasil dihapus!"
         ], 200);
     }
 }

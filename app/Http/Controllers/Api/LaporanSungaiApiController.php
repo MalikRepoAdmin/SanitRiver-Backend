@@ -5,27 +5,54 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\LaporanSungai;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Request;
+use Illuminate\Http\Request; 
 
 class DashboardApiController extends Controller
 {
+    /**
+     * Tampilkan 5 laporan terbaru untuk Dashboard (RESTful API).
+     */
     public function getLatestLaporans()
     {
-        $laporanSungais = LaporanSungai::with(['sungai','gambarsungai'])->latest()->paginate(5);
+        // Nama relasi diubah menjadi gambarSungais
+        $laporanSungais = LaporanSungai::with(['sungai', 'gambarSungais'])
+            ->latest()
+            ->paginate(5);
 
-        return view('index', compact($laporanSungais));
+        // Mengembalikan JSON murni
+        return response()->json([
+            'status'  => true,
+            'message' => '5 data laporan terbaru berhasil dimuat untuk dashboard.',
+            'data'    => $laporanSungais
+        ], 200);
     }
 
+    /**
+     * Cari laporan berdasarkan nama sungai via API JSON.
+     */
     public function search(Request $request)
     {
         // 1. Inisialisasi query builder
         $query = LaporanSungai::query();
 
-        $laporansungais = $this->applySearch($query, $request->query('search'))->paginate(10)->withQueryString();
+        // DIPERBAIKI: Eager load relasinya sekalian biar data sungai & gambarnya ikut keluar di JSON
+        $laporansungais = $this->applySearch($query, $request->query('search'))
+            ->with(['sungai', 'gambarSungais'])
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
 
-        return view('dashboard.user_dashboard', compact(['$laporansungais']));
+        // DIPERBAIKI: Mengembalikan JSON murni dan membuang fungsi compact() yang salah sintaks
+        return response()->json([
+            'status'  => true,
+            'message' => "Hasil pencarian laporan dengan kata kunci '" . $request->query('search') . "' berhasil dimuat.",
+            'data'    => $laporansungais
+        ], 200);
     }
 
+    /**
+     * Query builder filter untuk pencarian.
+     */
     private function applySearch(Builder $query, ?string $search) 
     {
         if (blank($search)) return $query;
@@ -39,8 +66,11 @@ class DashboardApiController extends Controller
         });
     }
 
+    /**
+     * Fungsi filter opsional untuk dashboard.
+     */
     public function filter(Request $request)
     {
-        //
+        
     }
 }

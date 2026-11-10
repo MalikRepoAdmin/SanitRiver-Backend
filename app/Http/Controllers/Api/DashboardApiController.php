@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+// Import Controller utama dengan path lengkap agar tidak memicu "Problems 1" di VS Code
+use App\Http\Controllers\Controller; 
 use App\Models\Sungai;
 use App\Models\LaporanSungai;
 
@@ -14,10 +15,12 @@ class DashboardApiController extends Controller
     public function getSummary()
     {
         return response()->json([
-            'total_sungai' => Sungai::count(),
-
-            'total_laporan' => LaporanSungai::count(),
-
-        ]);
+            'status'  => true,
+            'message' => 'Statistik ringkasan dashboard berhasil dimuat.',
+            'data'    => [
+                'total_sungai'  => Sungai::count(),
+                'total_laporan' => LaporanSungai::count(),
+            ]
+        ], 200);
     }
 }
