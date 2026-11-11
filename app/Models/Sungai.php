@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -24,7 +25,7 @@ class Sungai extends Model
     /**
      * Scope to get geometry in GeoJSON text format.
      */
-    public function scopeWithGeoJson($query)
+    public function scopeWithGeoJson (\Illuminate\Database\Eloquent\Builder $query)
     {
         return $query->select(
             'sungai_id',
