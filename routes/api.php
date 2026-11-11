@@ -35,3 +35,5 @@ Route::resource('users', UserController::class);
 
 // Special route for AJAX to get Bounding Box data (GeoJSON)
 Route::get('/sungai-bbox', [SungaiApiController::class, 'getWaterways'])->name('api.sungai.bbox');
+
+Route::get('/test-cors', [SungaiController::class, 'index']);
