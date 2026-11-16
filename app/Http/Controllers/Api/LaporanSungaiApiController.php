@@ -5,9 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\LaporanSungai;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request; 
+use Illuminate\Http\Request;
 
-class DashboardApiController extends Controller
+class LaporanSungaiApiController extends Controller
 {
     /**
      * Tampilkan 5 laporan terbaru untuk Dashboard (RESTful API).
@@ -53,11 +53,11 @@ class DashboardApiController extends Controller
     /**
      * Query builder filter untuk pencarian.
      */
-    private function applySearch(Builder $query, ?string $search) 
+    private function applySearch(Builder $query, ?string $search)
     {
         if (blank($search)) return $query;
 
-        return $query->where(function ($q) use ($search) 
+        return $query->where(function ($q) use ($search)
         {
             $q->whereHas('sungai', function ($sungaiQuery) use ($search)
             {
@@ -71,6 +71,6 @@ class DashboardApiController extends Controller
      */
     public function filter(Request $request)
     {
-        
+
     }
 }

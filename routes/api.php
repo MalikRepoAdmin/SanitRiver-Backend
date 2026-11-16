@@ -2,14 +2,18 @@
 
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\DashboardApiController;
+use App\Http\Controllers\Api\LaporanSungaiApiController;
 use App\Http\Controllers\Api\LaporanSungaiController;
 use App\Http\Controllers\Api\SungaiApiController;
 use App\Http\Controllers\Api\SungaiController;
 use App\Http\Controllers\Api\UserController;
-use Illuminate\http\Request;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-// Authentication routes
+/**
+ *  Authentication Routes
+ */
 Route::prefix('auth')->group(function () {
     Route::post('/register-user', [AuthController::class, 'registerUser']);
     Route::post('/register-admin', [AuthController::class, 'registerAdmin']);
@@ -23,44 +27,77 @@ Route::prefix('auth')->group(function () {
     });
 });
 
-// Only users assigned the 'admin' role can access anything inside this group (Spatie)
-Route::middleware(['role:admin'])->prefix('admin')->group(function () {
-    Route::get('/dashboard-admin', [AdminController::class, 'stats']);
-    Route::get('/users-list', [AdminController::class, 'listUsers']);
-    Route::delete('/users/{user}', [UserController::class, 'destroy']);
-});
 
-Route::get('/sungais/map', [SungaiController::class, 'map']);
-
-// Menggunakan apiResource sbg efisiensi
-Route::apiResource('sungais', SungaiController::class);
-Route::apiResource('laporan-sungais', LaporanSungaiController::class);
-
-// Admin and User routes
-Route::apiresource('admins', AdminController::class);
-Route::apiresource('users', UserController::class);
-
+/**
+ *  Special Routes
+ */
 // Special route for AJAX to get Bounding Box data (GeoJSON)
 Route::get('/sungai-bbox', [SungaiApiController::class, 'getWaterways'])->name('api.sungai.bbox');
 
-Route::get('/test-cors', [SungaiController::class, 'index']);
+// Special route for LaporanSungai
+Route::get('/laporan-sungais/latest', [LaporanSungaiApiController::class, 'getLatestLaporans'])->name('laporan.latest');
+Route::get('/laporan-sungais/search', [LaporanSungaiApiController::class, 'search'])->name('laporan.search');
 
-// Sanctum Auth protected routes
+// Special route for dashboard content
+Route::get('/dashboard-user', [DashboardApiController::class, 'getSummary'])->name('dashboard.user');
+
+
+/**
+ *  Sanctum Auth protected routes
+ */
 Route::middleware('auth:sanctum')->group(function () {
+
+    // Fetch User's informations
     Route::get('/user', function (Request $request) {
         return $request->user()->load('roles', 'permissions');
     });
 
+
+    /**
+     *  Permission based Routes
+     */
     // Laporan Routes
     Route::middleware(['permission:create-items'])->group(function () {
         Route::post('/laporan-sungais', [LaporanSungaiController::class, 'store']);
+        Route::post('/sungais', [SungaiController::class, 'store']);
     });
 
     Route::middleware(['permission:edit-items'])->group(function () {
         Route::patch('/laporan-sungais/{laporan_sungai}', [LaporanSungaiController::class, 'update']);
+        Route::patch('/sungais/{sungai}', [SungaiController::class, 'update']);
     });
 
     Route::middleware(['permission:delete-items'])->group(function () {
         Route::delete('/laporan-sungais/{laporan_sungai}', [LaporanSungaiController::class, 'destroy']);
+        Route::delete('/sungais/{sungai}', [SungaiController::class, 'destroy']);
+    });
+
+
+    /**
+     *  Role based Routes
+     */
+    // Only users assigned the 'admin' role can access anything inside this group (Spatie)
+    Route::middleware(['role:admin'])->prefix('admin')->group(function () {
+        Route::get('/dashboard-admin', [AdminController::class, 'stats']);
+
+        // Admin and User Resource routes
+        Route::apiResource('admins', AdminController::class);
+        Route::apiResource('users', UserController::class);
     });
 });
+
+
+/**
+ *  Resources Routes
+ */
+// Menggunakan apiResource sbg efisiensi
+
+
+/**
+ *  CRUD Routes
+ */
+Route::get('/laporan-sungais', [LaporanSungaiController::class, 'index']);
+Route::get('/laporan-sungais/{laporan_sungai}', [LaporanSungaiController::class, 'show']);
+
+Route::get('/sungais', [SungaiController::class, 'index']);
+Route::get('/sungais/{sungai}', [SungaiController::class, 'show']);
