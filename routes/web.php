@@ -7,7 +7,7 @@
  * Auth Routes
  */
 // Route untuk pengunjung yang BELUM login (Guest)
-// tes modul 12 - zahrah
+// tes modul 12 - malik
 // Tampilan Form
 /**
 Route::get('/login', [AuthController::class, 'showLoginUser'])->name('login');
