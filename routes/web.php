@@ -8,8 +8,6 @@
  */
 // Route untuk pengunjung yang BELUM login (Guest)
 
-// Tes Modul 12 - zahrah
-
 // Tampilan Form
 /**
 Route::get('/login', [AuthController::class, 'showLoginUser'])->name('login');
