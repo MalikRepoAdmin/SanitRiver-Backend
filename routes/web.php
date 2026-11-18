@@ -8,6 +8,7 @@
  */
 // Route untuk pengunjung yang BELUM login (Guest)
 // tes modul 12 - malik
+// tes conflict merge git - zahrah to malik
 // Tampilan Form
 /**
 Route::get('/login', [AuthController::class, 'showLoginUser'])->name('login');
