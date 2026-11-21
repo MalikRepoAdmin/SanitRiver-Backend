@@ -45,6 +45,9 @@ class AuthController extends Controller
             'domisili' => $request->whenFilled('domisili', fn($value) => $value),
         ]);
 
+        //menyematkan role default 'user' otomatis stlh registrasi
+        $user->assignRole('user');
+
         $token = $user->createToken('api')->plainTextToken;
 
         return response()->json([
@@ -79,6 +82,9 @@ class AuthController extends Controller
             'username' => $request->username,
             'password' => bcrypt($request->password),
         ]);
+
+        //menyematkan role default 'admin' otomatis stlh registrasi
+        $admin->assignRole('admin');
 
         $token = $admin->createToken('api')->plainTextToken;
 

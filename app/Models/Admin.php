@@ -9,19 +9,25 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens; 
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles; 
 
 #[Fillable(['email', 'username', 'password'])]
 #[Hidden(['password', 'remember_token'])]
 class Admin extends Authenticatable
 {
     /** @use HasFactory<AdminFactory> */
-    use HasApiTokens, HasFactory, Notifiable; 
+
+    //menambah trait HasRoles spatie permission utk manajemen role dan akses
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
     protected $table = 'admins';
     
     //pengaturan Eloquent - Primary Key
     protected $primaryKey = 'admin_id';
+
+    //guard spatie agar sesuai seeder ('admin')
+    protected $guard_name = 'admin';
 
     //mass-assignment method Admin::create()
     protected $fillable = ['username', 'email', 'password'];
