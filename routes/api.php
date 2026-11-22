@@ -27,7 +27,6 @@ Route::prefix('auth')->group(function () {
     });
 });
 
-
 /**
  *  Special Routes
  */
@@ -41,57 +40,88 @@ Route::get('/laporan-sungais/search', [LaporanSungaiApiController::class, 'searc
 // Special route for dashboard content
 Route::get('/dashboard-user', [DashboardApiController::class, 'getSummary'])->name('dashboard.user');
 
-
 /**
  *  Sanctum Auth protected routes
  */
 Route::middleware('auth:sanctum')->group(function () {
 
     // Fetch User's informations
-    Route::get('/user', function (Request $request) {
-        return $request->user()->load('roles', 'permissions');
+    Route::middleware([
+        'permission:show-current-user',
+    ])->group(function () {
+        Route::get('/user', function (Request $request) {
+            return $request->user()->load('roles', 'permissions');
+        });
     });
-
 
     /**
      *  Permission based Routes
      */
+
     // Laporan Routes
-    Route::middleware(['permission:create-items'])->group(function () {
+    Route::middleware(['permission:create-laporan_sungais'])->group(function () {
         Route::post('/laporan-sungais', [LaporanSungaiController::class, 'store']);
+    });
+
+    Route::middleware(['permission:edit-laporan_sungais'])->group(function () {
+        Route::patch('/laporan-sungais/{laporan_sungai}', [LaporanSungaiController::class, 'update']);
+    });
+
+    Route::middleware(['permission:delete-laporan_sungais'])->group(function () {
+        Route::delete('/laporan-sungais/{laporan_sungai}', [LaporanSungaiController::class, 'destroy']);
+    });
+
+    // Sungai Routes
+    Route::middleware(['permission:create-sungais'])->group(function () {
         Route::post('/sungais', [SungaiController::class, 'store']);
     });
 
-    Route::middleware(['permission:edit-items'])->group(function () {
-        Route::patch('/laporan-sungais/{laporan_sungai}', [LaporanSungaiController::class, 'update']);
+    Route::middleware(['permission:edit-sungais'])->group(function () {
         Route::patch('/sungais/{sungai}', [SungaiController::class, 'update']);
     });
 
-    Route::middleware(['permission:delete-items'])->group(function () {
-        Route::delete('/laporan-sungais/{laporan_sungai}', [LaporanSungaiController::class, 'destroy']);
+    Route::middleware(['permission:delete-sungais'])->group(function () {
         Route::delete('/sungais/{sungai}', [SungaiController::class, 'destroy']);
     });
-
 
     /**
      *  Role based Routes
      */
-    // Only users assigned the 'admin' role can access anything inside this group (Spatie)
-    Route::middleware(['role:admin'])->prefix('admin')->group(function () {
+    // Only the 'admin' role can access anything inside this group (Spatie)
+    // role:admin,admin means role admin and ensure using 'admin' guard
+    // regular user with admin token can't use these
+    Route::middleware(['auth:admin', 'role:admin,admin'])->prefix('admin')->group(function () {
         Route::get('/dashboard-admin', [AdminController::class, 'stats']);
 
         // Admin and User Resource routes
-        Route::apiResource('admins', AdminController::class);
-        Route::apiResource('users', UserController::class);
+        Route::middleware([
+            'permission:create-users',
+            'permission:show-user',
+            'permission:show-current-user',
+            'permission:list-users',
+            'permission:edit-users',
+            'permission:delete-users',
+        ])->group(function () {
+            Route::apiResource('users', UserController::class);
+        });
+
+        Route::middleware([
+            'permission:create-admins',
+            'permission:show-admin',
+            'permission:show-current-admin',
+            'permission:list-admins',
+            'permission:edit-admins',
+            'permission:delete-admins',
+        ])->group(function () {
+            Route::apiResource('admins', AdminController::class);
+        });
     });
 });
-
 
 /**
  *  Resources Routes
  */
 // Menggunakan apiResource sbg efisiensi
-
 
 /**
  *  CRUD Routes
