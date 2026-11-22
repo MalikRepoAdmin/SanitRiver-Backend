@@ -43,6 +43,18 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+
+        //Guard REST API sanctum utk authentikasi & Spatie Permission model User
+        'user' => [
+            'driver' => 'sanctum',
+            'provider' => 'users',
+        ],
+
+        //Guard REST API sanctum utk authentikasi & Spatie Permission model Admin
+        'admin' => [
+            'driver' => 'sanctum',
+            'provider' => 'admins',
+        ],
     ],
 
     /*

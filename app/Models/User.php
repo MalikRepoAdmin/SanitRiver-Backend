@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens; 
+use Spatie\Permission\Traits\HasRoles;
 
 //mass-assignment method User::create()
 #[Fillable([
@@ -28,9 +29,15 @@ use Laravel\Sanctum\HasApiTokens;
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasApiTokens, HasFactory, Notifiable; 
-    // pengaturan Eloquent - Primary Key
+
+    //menambah trait HasRoles spatie permission utk manajemen role dan akses
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+
+    //pengaturan Eloquent - Primary Key
     protected $primaryKey = 'user_id';
+
+    //guard spatie agar sesuai seeder ('user')
+    protected $guard_name = 'user';
 
     /**
      * Get the attributes that should be cast.

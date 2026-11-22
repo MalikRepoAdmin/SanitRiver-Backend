@@ -18,7 +18,11 @@ class DatabaseSeeder extends Seeder
         // Memuat data user melalui UserSeeder
 
         $this->call([
+            RolePermissionSeeder::class,
             UserSeeder::class,
+            AdminSeeder::class,
+            SungaiSeeder::class,
+            LaporanSungaiSeeder::class,
         ]);
     }
 }

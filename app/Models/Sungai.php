@@ -14,6 +14,10 @@ class Sungai extends Model
 
     protected $primaryKey = 'sungai_id';
 
+    protected $hidden = [
+        'geometri',
+    ];
+
     protected $fillable = [
         'nama_sungai',
         'alamat',

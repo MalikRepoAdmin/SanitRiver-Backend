@@ -1,58 +1,162 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# SanitRiver Backend API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Backend RESTful API untuk **SanitRiver**, platform digital berbasis data spasial sungai dan pelaporan kondisi sanitasi/sungai yang mendukung **SDG 6 (Clean Water and Sanitation)**. Layanan ini dibangun menggunakan **Laravel** dengan arsitektur *decoupled API* berbasis JSON, autentikasi token **Laravel Sanctum**, kontrol akses berbasis peran dan izin (**Spatie Laravel Permission**), database **MariaDB** (terkelola di Layerbase), serta deployment di **Wasmer**.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Identitas Kelompok
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Anggota Kelompok 6 — SDG 6: Clean Water and Sanitation (4 Anggota)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+| No | Nama Lengkap | NIM / ID | Peran dalam Tim |
+| :- | :--- | :--- | :--- |
+| 1 | *Angelis Nasta Nadia* | *254311010* | *Frontend / Implementasi UI* |
+| 2 | *Mohamad Malik fajar Baihaqi* | *254311011* | *Backend & Keamanan / Pengaturan endpoint / Auth* |
+| 3 | *Raditya Daffa Pratama* | *254311018* | *Frontend / Integrasi API* |
+| 4 | *ZAHRAH* | *244311060* | *Backend / REST API* |
 
-## Learning Laravel
+### Anggota Pengembang Backend (2 Anggota)
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+| No | Nama Lengkap | NIM / ID | Tanggung Jawab Utama Backend |
+| :- | :--- | :--- | :--- |
+| 1 | *Mohamad Malik fajar Baihaqi* | *254311011* | Routing API, autentikasi Sanctum, pengujian API (Bruno), & deployment Wasmer |
+| 2 | *ZAHRAH* | *244311060* | Skema database & seeder, Implementasi JSON Response, multi-guard RBAC/Permission Spatie |
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+## Arsitektur & Ringkasan Sistem
 
-## Agentic Development
+- **Decoupled Backend API:** Seluruh endpoint mengembalikan respons JSON terstandar (`status`, `message`, `data`) beserta kode status HTTP yang konsisten (`200`, `201`, `401`, `403`, `404`, `422`, `500`) untuk memudahkan konsumsi oleh aplikasi frontend terpisah.
+- **Dual Authenticatable Model (`User` & `Admin`):** Memisahkan entitas pengguna umum (`User`, primary key `user_id`, guard `user`) dan administrator (`Admin`, primary key `admin_id`, guard `admin`) dengan konfigurasi guard/provider eksplisit di `config/auth.php`.
+- **Pertahanan Berlapis (*Defense in Depth*):** Mengombinasikan middleware rute (`auth:sanctum`, `role:...`, `permission:...`) dengan validasi model (`instanceof`) dan pengecekan izin berbasis guard di dalam controller.
+- **Strategi Routing Terstruktur:** Rute statis/khusus (seperti `/laporan-sungais/latest`, `/laporan-sungais/search`, `/sungai-bbox`, `/dashboard-user`) ditempatkan sebelum rute berparameter dinamis (seperti `/{laporan_sungai}`) agar tidak terjadi bentrok rute atau `404`.
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+---
 
-```bash
-composer require laravel/boost --dev
+## Pihak Ketiga & Alasan Penggunaan
 
-php artisan boost:install
+| Pihak Ketiga / Teknologi | Fungsi dalam Proyek | Alasan Penggunaan |
+| :--- | :--- | :--- |
+| **Laravel Framework** | Kerangka kerja utama REST API, routing, Eloquent ORM, validasi, & seeder | Ekosistem matang, struktur kode rapi, dukungan migrasi/seeder yang jelas, serta mempercepat pengembangan API terstandar. |
+| **Laravel Sanctum** | Autentikasi API berbasis token (`Bearer Token`) | Ringan dan sesuai untuk arsitektur API *decoupled* tanpa ketergantungan sesi browser tradisional, sekaligus mendukung asosiasi token ke model `User` maupun `Admin`. |
+| **Spatie Laravel Permission** | Manajemen *Role* dan *Permission* (`role:admin`, `permission:...`) | Menyediakan kontrol akses granular berbasis database dan cache, serta mendukung pemisahan *guard* (`user` dan `admin`) secara terstruktur. |
+| **MariaDB (Layerbase)** | Sistem manajemen basis data relasional (RDBMS) | Andal untuk menyimpan data relasional pengguna, admin, sungai, dan laporan sungai; hosting Layerbase memudahkan verifikasi koneksi database cloud sejak awal. |
+| **Wasmer** | Platform *deployment* aplikasi backend | Memungkinkan proses *build* dan *deploy* lingkungan produksi secara praktis serta memvalidasi kesiapan runtime lebih awal dalam siklus pengembangan. |
+| **Bruno** | Klien pengujian API (*API Client*) | Memudahkan pengujian endpoint publik, autentikasi, dan kasus *authorized* (`200`/`201`) maupun *unauthorized* (`401`/`403`) secara terstruktur dan ringan. |
+
+---
+
+## Struktur Utama Proyek
+
+```text
+SanitRiver-Backend/
+├── app/
+│   ├── Http/Controllers/Api/   # AuthController, AdminController, SungaiController, LaporanSungaiController, dll.
+│   └── Models/                 # User, Admin, Sungai, LaporanSungai
+├── bootstrap/
+│   └── app.php                 # Registrasi middleware & konfigurasi aplikasi
+├── config/
+│   └── auth.php                # Konfigurasi guards & providers (users / admins)
+├── database/
+│   ├── migrations/             # Struktur tabel aplikasi, Sanctum, dan Spatie Permission
+│   └── seeders/                # RolePermissionSeeder, AdminSeeder, UserSeeder, DatabaseSeeder
+└── routes/
+    └── api.php                 # Definisi endpoint publik, autentikasi, permission, dan admin
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+---
 
-## Contributing
+## Cara Clone dan Menjalankan (Local Development)
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### Prasyarat
 
-## Code of Conduct
+- **PHP** (sesuai versi yang didukung proyek Laravel yang digunakan) & **Composer**
+- **MariaDB** / **MySQL** (lokal, Docker, atau instance Layerbase)
+- **Git**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 1. Clone Repositori
 
-## Security Vulnerabilities
+```bash
+git clone [https://github.com/](https://github.com/)<username-atau-organisasi>/SanitRiver-Backend.git
+cd SanitRiver-Backend
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 2. Instal Dependensi PHP
 
-## License
+```bash
+composer install
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### 3. Konfigurasi Environment (`.env`)
+
+Salin berkas `.env.example` menjadi `.env`, lalu generate *application key*:
+
+```bash
+cp .env.example .env
+php artisan key:generate
+```
+
+Sesuaikan konfigurasi database di `.env` (arah ke MariaDB lokal atau kredensial Layerbase):
+
+```env
+APP_NAME=SanitRiver
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost:8000
+
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=sanitriver_db
+DB_USERNAME=root
+DB_PASSWORD=
+```
+
+### 4. Migrasi dan Seeding Database
+
+Jalankan migrasi beserta seeder sesuai urutan (`RolePermissionSeeder` terlebih dahulu, diikuti `AdminSeeder` dan seeder data/pengguna):
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+Jika ingin menjalankan seeder secara terpisah:
+
+```bash
+php artisan db:seed --class=RolePermissionSeeder
+php artisan db:seed --class=AdminSeeder
+```
+
+### 5. Jalankan Server Lokal
+
+```bash
+php artisan serve
+```
+
+API akan berjalan di `http://127.0.0.1:8000` (dengan prefix rute API sesuai konfigurasi Laravel, umumnya `/api/...`).
+
+---
+
+## Ringkasan Endpoint Utama
+
+- **Autentikasi (`User` & `Admin`):**
+  - `POST /api/auth/register-user`, `POST /api/auth/login-user`, `POST /api/auth/logout-user`
+  - `POST /api/auth/register-admin`, `POST /api/auth/login-admin`, `POST /api/auth/logout-admin`
+- **Data Spasial & Publik:**
+  - `GET /api/sungai-bbox`
+  - `GET /api/laporan-sungais`, `GET /api/laporan-sungais/{laporan_sungai}`
+  - `GET /api/laporan-sungais/latest`, `GET /api/laporan-sungais/search`
+  - `GET /api/sungais`, `GET /api/sungais/{sungai}`
+  - `GET /api/dashboard-user`
+- **Terproteksi Sanctum, Role & Permission:**
+  - `GET /api/user`
+  - `POST / PATCH / DELETE /api/laporan-sungais`
+  - `POST / PATCH / DELETE /api/sungais`
+  - Prefix `/api/admin/*` (`GET /api/admin/dashboard-admin`, `apiResource` `users` & `admins` dengan peran `admin`)
+
+---
+
+## Pengujian & Deployment
+
+- **Pengujian API:** Seluruh alur registrasi, login, akses data publik, otorisasi berbasis peran/izin (`role` & `permission`), serta penolakan akses tidak sah (`401`/`403`) telah diuji.
+- **Deployment:** Kesiapan lingkungan produksi telah diverifikasi menggunakan **Wasmer** dan basis data **MariaDB** pada **Layerbase**. Pastikan variabel lingkungan produksi (`APP_ENV=production`, `APP_DEBUG=false`, kredensial DB, dan konfigurasi CORS/URL) diatur aman pada platform deployment sebelum digunakan secara publik.
