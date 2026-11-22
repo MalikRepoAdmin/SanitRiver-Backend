@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Admin;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class AdminController extends Controller
 {
@@ -14,6 +13,10 @@ class AdminController extends Controller
      */
     public function index(Request $request)
     {
+        if ($denied = $this->ensureAuthorized($request->user(), 'list-admins', Admin::class, true)) {
+            return $denied;
+        }
+
         $perPage = $request->integer('per_page', 20);
         $perPage = min($perPage, 100);
 
@@ -22,7 +25,7 @@ class AdminController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Semua data admin berhasil dimuat.',
-            'data' => $admins
+            'data' => $admins,
         ], 200);
     }
 
@@ -39,6 +42,10 @@ class AdminController extends Controller
      */
     public function store(Request $request)
     {
+        if ($denied = $this->ensureAuthorized($request->user(), 'create-admins', Admin::class, true)) {
+            return $denied;
+        }
+
         // Validasi data input dari API
         $validated = $request->validate([
             'username' => 'required|string|unique:admins,username',
@@ -57,7 +64,7 @@ class AdminController extends Controller
         return response()->json([
             'status' => true,
             'message' => "Profil admin id {$admin->admin_id} berhasil ditambahkan.",
-            'data' => $admin
+            'data' => $admin,
         ], 201);
     }
 
@@ -66,14 +73,18 @@ class AdminController extends Controller
      */
     public function show(string $admin_id)
     {
+        if ($denied = $this->ensureAuthorized(null, 'show-admin', Admin::class, true)) {
+            return $denied;
+        }
+
         // Gunakan first() biasa agar tidak memicu crash bawaan saat data kosong
         $admin = Admin::where('admin_id', $admin_id)->with(['sungais.gambarSungais'])->first();
 
         // Handling jika admin tidak ditemukan / id tidak ada
-        if (!$admin) {
+        if (! $admin) {
             return response()->json([
                 'status' => false,
-                'message' => "Profil admin id $admin_id belum terdaftar."
+                'message' => "Profil admin id $admin_id belum terdaftar.",
             ], 404);
         }
 
@@ -83,9 +94,9 @@ class AdminController extends Controller
             'status' => true,
             'message' => "Admin berhasil dimuat dengan id $admin_id.",
             'data' => [
-            'admin' => $admin,
-            'name_word_count' => $nameWordCount
-            ]
+                'admin' => $admin,
+                'name_word_count' => $nameWordCount,
+            ],
         ], 200);
     }
 
@@ -94,19 +105,23 @@ class AdminController extends Controller
      */
     public function edit(string $admin_id)
     {
+        if ($denied = $this->ensureAuthorized(null, 'edit-admins', Admin::class, true)) {
+            return $denied;
+        }
+
         $admin = Admin::where('admin_id', $admin_id)->first();
 
-        if (!$admin) {
+        if (! $admin) {
             return response()->json([
                 'status' => false,
-                'message' => "Profil admin id $admin_id belum terdaftar."
+                'message' => "Profil admin id $admin_id belum terdaftar.",
             ], 404);
         }
 
         return response()->json([
             'status' => true,
             'message' => 'Form edit data admin berhasil disiapkan.',
-            'data' => $admin
+            'data' => $admin,
         ], 200);
     }
 
@@ -115,18 +130,22 @@ class AdminController extends Controller
      */
     public function update(Request $request, string $admin_id)
     {
+        if ($denied = $this->ensureAuthorized($request->user(), 'edit-admins', Admin::class, true)) {
+            return $denied;
+        }
+
         $admin = Admin::where('admin_id', $admin_id)->first();
 
-        if (!$admin) {
+        if (! $admin) {
             return response()->json([
                 'status' => false,
-                'message' => "Profil admin id $admin_id belum terdaftar."
+                'message' => "Profil admin id $admin_id belum terdaftar.",
             ], 404);
         }
 
         $validated = $request->validate([
-            'username' => 'nullable|string|unique:admins,username,' . $admin->id,
-            'email' => 'nullable|email|unique:admins,email,' . $admin->id,
+            'username' => 'nullable|string|unique:admins,username',
+            'email' => 'nullable|email|unique:admins,email',
         ]);
 
         $admin->update($validated);
@@ -134,7 +153,7 @@ class AdminController extends Controller
         return response()->json([
             'status' => true,
             'message' => "Profil admin id {$admin->admin_id} berhasil diperbarui.",
-            'data' => $admin
+            'data' => $admin,
         ], 200);
     }
 
@@ -143,12 +162,13 @@ class AdminController extends Controller
      */
     public function destroy(string $admin_id)
     {
+
         $admin = Admin::where('admin_id', $admin_id)->first();
 
-        if (!$admin) {
+        if (! $admin) {
             return response()->json([
                 'status' => false,
-                'message' => "Gagal menghapus. Admin id $admin_id belum terdaftar."
+                'message' => "Gagal menghapus. Admin id $admin_id belum terdaftar.",
             ], 404);
         }
 
@@ -158,7 +178,6 @@ class AdminController extends Controller
             'status' => true,
             'message' => "Profil admin id {$admin->admin_id} berhasil dihapus!",
         ], 200);
-     
-    
+
     }
 }

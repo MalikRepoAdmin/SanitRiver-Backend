@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Admin;
 use App\Models\Sungai;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -19,26 +20,27 @@ class SungaiController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Semua data sungai berhasil dimuat.',
-            'data' => $sungais
+            'data' => $sungais,
         ], 200);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        
-    }
+    public function create() {}
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
+        if ($denied = $this->ensureAuthorized($request->user(), 'create-sungais', Admin::class, true)) {
+            return $denied;
+        }
+
         $data = $request->validate([
             'nama_sungai' => 'required|string',
-            'alamat' => 'nullable|string',
+            'alamat' => 'required|string',
             'status' => 'nullable|string',
             'tipe_sungai' => 'nullable|string',
             'geometri' => 'nullable',
@@ -59,10 +61,10 @@ class SungaiController extends Controller
     {
         $sungai = Sungai::where('sungai_id', $sungai_id)->first();
 
-        if (!$sungai) {
+        if (! $sungai) {
             return response()->json([
                 'status' => false,
-                'message' => "ID Sungai $sungai_id tidak ada!"
+                'message' => "ID Sungai $sungai_id tidak ada!",
             ], 404);
         }
 
@@ -75,29 +77,30 @@ class SungaiController extends Controller
         return response()->json([
             'status' => true,
             'message' => "Detail data sungai ditemukan. [{$infoGambar} | {$infoLaporan}]",
-            'data' => $sungai
+            'data' => $sungai,
         ], 200);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $sungai_id)
-    {
-        
-    }
+    public function edit(string $sungai_id) {}
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $sungai_id)
     {
+        if ($denied = $this->ensureAuthorized($request->user(), 'edit-sungais', Admin::class, true)) {
+            return $denied;
+        }
+
         $sungai = Sungai::where('sungai_id', $sungai_id)->first();
 
-        if (!$sungai) {
+        if (! $sungai) {
             return response()->json([
                 'status' => false,
-                'message' => "Gagal memperbarui: ID Sungai $sungai_id tidak ditemukan!"
+                'message' => "Gagal memperbarui: ID Sungai $sungai_id tidak ditemukan!",
             ], 404);
         }
 
@@ -114,7 +117,7 @@ class SungaiController extends Controller
         return response()->json([
             'status' => true,
             'message' => "Data sungai id {$sungai->sungai_id} berhasil diperbarui.",
-            'data' => $sungai
+            'data' => $sungai,
         ], 200);
     }
 
@@ -125,10 +128,10 @@ class SungaiController extends Controller
     {
         $sungai = Sungai::where('sungai_id', $sungai_id)->first();
 
-        if (!$sungai) {
+        if (! $sungai) {
             return response()->json([
                 'status' => false,
-                'message' => "Gagal menghapus: ID Sungai $sungai_id tidak ditemukan!"
+                'message' => "Gagal menghapus: ID Sungai $sungai_id tidak ditemukan!",
             ], 404);
         }
 
@@ -144,7 +147,7 @@ class SungaiController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => "Data sungai id {$sungai->sungai_id} beserta file gambar terkait berhasil dihapus."
+            'message' => "Data sungai id {$sungai->sungai_id} beserta file gambar terkait berhasil dihapus.",
         ], 200);
     }
 
@@ -159,17 +162,17 @@ class SungaiController extends Controller
         // Jika database sungai kosong, kembalikan respon empty array yang rapi
         if ($sungais->isEmpty()) {
             return response()->json([
-                'status'  => true,
+                'status' => true,
                 'message' => 'Data lokasi sungai masih kosong.',
-                'data'    => []
+                'data' => [],
             ], 200);
         }
 
         // Return JSON murni yang siap dirender oleh Front-End sebagai koordinat peta
         return response()->json([
-            'status'  => true,
+            'status' => true,
             'message' => 'Seluruh koordinat dan lokasi peta sungai berhasil dimuat.',
-            'data'    => $sungais
+            'data' => $sungais,
         ], 200);
     }
 }

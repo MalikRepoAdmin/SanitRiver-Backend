@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\LaporanSungai;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class LaporanSungaiController extends Controller
 {
@@ -19,23 +18,24 @@ class LaporanSungaiController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Semua data laporan sungai berhasil dimuat.',
-            'data' => $items
+            'data' => $items,
         ], 200);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
-    {
-        
-    }
+    public function create() {}
 
     /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
+        if ($denied = $this->ensureAuthorized($request->user(), 'create-laporan_sungais')) {
+            return $denied;
+        }
+
         $data = $request->validate([
             'user_id' => 'required|exists:users,user_id',
             'sungai_id' => 'required|exists:sungais,sungai_id',
@@ -50,7 +50,7 @@ class LaporanSungaiController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => "Data laporan sungai ID {$laporan->laporansungai_id} berhasil ditambahkan."
+            'message' => "Data laporan sungai ID {$laporan->laporansungai_id} berhasil ditambahkan.",
         ], 201);
     }
 
@@ -59,45 +59,46 @@ class LaporanSungaiController extends Controller
      */
     public function show(string $laporansungai_id)
     {
-        $laporanSungai = laporanSungai::where('laporansungai_id', $laporansungai_id)->first();
+        $laporanSungai = LaporanSungai::where('laporansungai_id', $laporansungai_id)->first();
 
-        //handling 404
-        if (!$laporanSungai) {
+        // handling 404
+        if (! $laporanSungai) {
             return response()->json([
                 'status' => false,
-                'message' => "Data laporan sungai ID $laporansungai_id tidak tersedia."
+                'message' => "Data laporan sungai ID $laporansungai_id tidak tersedia.",
             ], 404);
         }
 
-        //eager load memuat data relasi
+        // eager load memuat data relasi
         $laporanSungai->load(['user', 'sungai', 'gambarSungais']);
 
         return response()->json([
             'status' => true,
             'message' => 'Detail data laporan sungai berhasil dimuat.',
-            'data' => $laporanSungai
+            'data' => $laporanSungai,
         ], 200);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit($id)
-    {
-        
-    }
+    public function edit($id) {}
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, string $laporansungai_id)
     {
-        $laporanSungai = laporanSungai::where('laporansungai_id', $laporansungai_id)->first();
+        if ($denied = $this->ensureAuthorized($request->user(), 'edit-laporan_sungais')) {
+            return $denied;
+        }
 
-        if (!$laporanSungai) {
+        $laporanSungai = LaporanSungai::where('laporansungai_id', $laporansungai_id)->first();
+
+        if (! $laporanSungai) {
             return response()->json([
                 'status' => false,
-                'message' => "Data laporan sungai ID $laporansungai_id tidak tersedia."
+                'message' => "Data laporan sungai ID $laporansungai_id tidak tersedia.",
             ], 404);
         }
 
@@ -116,7 +117,7 @@ class LaporanSungaiController extends Controller
         return response()->json([
             'status' => true,
             'message' => "Data laporan sungai ID {$laporanSungai->laporansungai_id} berhasil diperbarui.",
-            'data' => $laporanSungai
+            'data' => $laporanSungai,
         ], 200);
     }
 
@@ -125,12 +126,13 @@ class LaporanSungaiController extends Controller
      */
     public function destroy(string $laporansungai_id)
     {
-        $laporanSungai = laporanSungai::where('laporansungai_id', $laporansungai_id)->first();
 
-        if (!$laporanSungai) {
+        $laporanSungai = LaporanSungai::where('laporansungai_id', $laporansungai_id)->first();
+
+        if (! $laporanSungai) {
             return response()->json([
                 'status' => false,
-                'message' => "Data laporan sungai ID $laporansungai_id tidak tersedia."
+                'message' => "Data laporan sungai ID $laporansungai_id tidak tersedia.",
             ], 404);
         }
 
@@ -138,7 +140,7 @@ class LaporanSungaiController extends Controller
 
         return response()->json([
             'status' => true,
-            'message' => "Data laporan sungai ID {$laporanSungai->laporansungai_id} berhasil dihapus!"
+            'message' => "Data laporan sungai ID {$laporanSungai->laporansungai_id} berhasil dihapus!",
         ], 200);
     }
 }
