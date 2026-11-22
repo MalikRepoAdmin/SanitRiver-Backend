@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class UserSeeder extends Seeder
 {
@@ -13,6 +15,11 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
+        $userGuard = 'user';
+        $userRole = Role::findOrCreate('user', $userGuard);
+
         $users = [
             [
                 'email' => 'budi.santoso@example.com',
@@ -53,7 +60,10 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($users as $userData) {
-            User::create($userData);
+            $user = User::create($userData);
+            $user->syncRoles([$userRole]);
         }
+
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }
 }
