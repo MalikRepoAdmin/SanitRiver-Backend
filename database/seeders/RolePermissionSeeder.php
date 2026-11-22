@@ -54,6 +54,8 @@ class RolePermissionSeeder extends Seeder
             fn (string $permission) => Permission::findOrCreate($permission, $userGuard)
         );
 
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
         $userRole = Role::findOrCreate('user', $userGuard);
 
         $userRole->syncPermissions([
@@ -78,6 +80,8 @@ class RolePermissionSeeder extends Seeder
         $adminPermissions = collect($permissions)->map(
             fn (string $permission) => Permission::findOrCreate($permission, $adminGuard)
         );
+
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         $adminRole = Role::findOrCreate('admin', $adminGuard);
 
